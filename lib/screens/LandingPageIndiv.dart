@@ -5,10 +5,10 @@ import '../widgets/custom_bottom_nav_bar.dart';
 import '../widgets/custom_drawer.dart';
 import '../widgets/splash_out.dart';
 import 'Login_screen.dart';
-import 'workout_plans_screen.dart'; // Import your workout plans screen
-import 'nutrition_plans_screen.dart'; // Import your nutrition plans screen
-import 'settings_screen.dart'; // Import your settings screen
-import 'profile_screen.dart'; // Import your profile screen
+import 'workout_plans_screen.dart';
+import 'nutrition_plans_screen.dart';
+import 'settings_screen.dart';
+import 'profile_screen.dart';
 
 class LandingPage extends StatefulWidget {
   const LandingPage({Key? key}) : super(key: key);
@@ -19,40 +19,40 @@ class LandingPage extends StatefulWidget {
 
 class _LandingPageState extends State<LandingPage> {
   Future<void> _signOut(BuildContext context) async {
-    try {
-      await FirebaseAuth.instance.signOut();
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const SplashScreenOut()),
-      );
-    } catch (e) {
-      print('Sign-out error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Failed to sign out. Please try again.'),
-        ),
-      );
-    }
+    // Implement sign out functionality
+    await FirebaseAuth.instance.signOut();
+    Navigator.of(context).pushReplacement(MaterialPageRoute(
+      builder: (context) => LoginScreen(),
+    ));
   }
 
   Future<Map<String, dynamic>> _getUserData() async {
-    User? user = FirebaseAuth.instance.currentUser;
-
-    if (user != null) {
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-
-      return userDoc.data() as Map<String, dynamic>;
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      return {}; // Handle case where user is not logged in
     }
 
-    return {};
+    try {
+      final doc = await FirebaseFirestore.instance.collection('users').doc(user.uid).get();
+      if (doc.exists) {
+        return doc.data() as Map<String, dynamic>;
+      } else {
+        return {}; // Handle case where user data is not found
+      }
+    } catch (e) {
+      print('Error fetching user data: $e');
+      return {}; // Return empty map on error
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).pop(), // Navigate back to Profile Choice
+        ),
         title: const Text('Fitness Dashboard'),
         backgroundColor: Colors.deepPurple,
       ),
@@ -74,7 +74,7 @@ class _LandingPageState extends State<LandingPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Text(
-                    'Hello, $fullName!',
+                    'Hi, $fullName!',
                     style: TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
@@ -82,57 +82,59 @@ class _LandingPageState extends State<LandingPage> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  const Text(
-                    'Welcome back to your fitness journey. Here\'s what you can do:',
-                    style: TextStyle(fontSize: 18),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.check, size: 40, color: Colors.green),
+                            const SizedBox(height: 10),
+                            Text(
+                              'Completed Workouts\n12',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Icon(Icons.timer, size: 40, color: Colors.blue),
+                            const SizedBox(height: 10),
+                            Text(
+                              'Time Spent\n62 Minutes',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 20),
+                  const Text(
+                    'Discover New Workouts',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                  const SizedBox(height: 10),
                   Expanded(
                     child: GridView.count(
                       crossAxisCount: 2,
                       crossAxisSpacing: 16,
                       mainAxisSpacing: 16,
                       children: [
-                        _DashboardCard(
-                          icon: Icons.person,
-                          title: 'View Profile',
-                          color: Colors.blue,
-                          onTap: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => ProfileScreen(),
-                            ));
-                          },
-                        ),
-                        _DashboardCard(
-                          icon: Icons.fitness_center,
-                          title: 'Workout Plans',
-                          color: Colors.orange,
-                          onTap: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => WorkoutPlansScreen(),
-                            ));
-                          },
-                        ),
-                        _DashboardCard(
-                          icon: Icons.restaurant,
-                          title: 'Nutrition Plans',
-                          color: Colors.green,
-                          onTap: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => NutritionPlansScreen(),
-                            ));
-                          },
-                        ),
-                        _DashboardCard(
-                          icon: Icons.settings,
-                          title: 'Settings',
-                          color: Colors.red,
-                          onTap: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => SettingsScreen(),
-                            ));
-                          },
-                        ),
+                        workoutCard(icon: Icons.accessibility, title: 'Cardio'),
+                        workoutCard(icon: Icons.museum, title: 'Arms'),
+                        // Add more workout cards
                       ],
                     ),
                   ),
@@ -145,55 +147,26 @@ class _LandingPageState extends State<LandingPage> {
       bottomNavigationBar: CustomBottomNavBar(currentIndex: 2),
     );
   }
-}
 
-class _DashboardCard extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final Color color;
-  final VoidCallback onTap;
-
-  const _DashboardCard({
-    Key? key,
-    required this.icon,
-    required this.title,
-    required this.color,
-    required this.onTap,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Card(
-      color: color,
-      elevation: 5,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icon,
-                size: 50,
-                color: Colors.white,
-              ),
-              const SizedBox(height: 10),
-              Text(
-                title,
-                style: const TextStyle(
-                  fontSize: 18,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
+  Widget workoutCard({required IconData icon, required String title}) => Card(
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    color: Colors.blue,
+    child: Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 50, color: Colors.white),
+          const SizedBox(height: 10),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
-        ),
+        ],
       ),
-    );
-  }
+    ),
+  );
 }

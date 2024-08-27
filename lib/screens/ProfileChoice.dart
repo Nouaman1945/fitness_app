@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'CoachSetup.dart';
+import 'CoachSetupScreen.dart';
 import 'IndivSetup.dart';
 
 class AccountSetupScreen extends StatelessWidget {
