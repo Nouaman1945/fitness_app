@@ -3,8 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import '../widgets/custom_bottom_nav_bar.dart';
 import '../widgets/custom_drawer.dart';
-import '../widgets/splash_out.dart';
 import 'Login_screen.dart';
+import 'coaches.dart';
 import 'workout_plans_screen.dart';
 import 'nutrition_plans_screen.dart';
 import 'settings_screen.dart';
@@ -19,7 +19,6 @@ class LandingPage extends StatefulWidget {
 
 class _LandingPageState extends State<LandingPage> {
   Future<void> _signOut(BuildContext context) async {
-    // Implement sign out functionality
     await FirebaseAuth.instance.signOut();
     Navigator.of(context).pushReplacement(MaterialPageRoute(
       builder: (context) => LoginScreen(),
@@ -29,7 +28,7 @@ class _LandingPageState extends State<LandingPage> {
   Future<Map<String, dynamic>> _getUserData() async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      return {}; // Handle case where user is not logged in
+      return {};
     }
 
     try {
@@ -37,11 +36,11 @@ class _LandingPageState extends State<LandingPage> {
       if (doc.exists) {
         return doc.data() as Map<String, dynamic>;
       } else {
-        return {}; // Handle case where user data is not found
+        return {};
       }
     } catch (e) {
       print('Error fetching user data: $e');
-      return {}; // Return empty map on error
+      return {};
     }
   }
 
@@ -51,10 +50,20 @@ class _LandingPageState extends State<LandingPage> {
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(), // Navigate back to Profile Choice
+          onPressed: () => Navigator.of(context).pop(),
         ),
         title: const Text('Fitness Dashboard'),
         backgroundColor: Colors.deepPurple,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.deepPurple, Colors.purpleAccent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
       ),
       drawer: const CustomDrawer(),
       body: FutureBuilder<Map<String, dynamic>>(
@@ -75,7 +84,7 @@ class _LandingPageState extends State<LandingPage> {
                 children: [
                   Text(
                     'Hi, $fullName!',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
                       color: Colors.deepPurple,
@@ -92,7 +101,7 @@ class _LandingPageState extends State<LandingPage> {
                             const SizedBox(height: 10),
                             Text(
                               'Completed Workouts\n12',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -109,7 +118,7 @@ class _LandingPageState extends State<LandingPage> {
                             const SizedBox(height: 10),
                             Text(
                               'Time Spent\n62 Minutes',
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -134,8 +143,29 @@ class _LandingPageState extends State<LandingPage> {
                       children: [
                         workoutCard(icon: Icons.accessibility, title: 'Cardio'),
                         workoutCard(icon: Icons.museum, title: 'Arms'),
-                        // Add more workout cards
+                        // Add more workout cards as needed
                       ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const CoachesScreen(),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.deepPurple,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'View Coaches',
+                      style: TextStyle(fontSize: 18, color: Colors.white),
                     ),
                   ),
                 ],
@@ -151,6 +181,8 @@ class _LandingPageState extends State<LandingPage> {
   Widget workoutCard({required IconData icon, required String title}) => Card(
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     color: Colors.blue,
+    elevation: 8,
+    shadowColor: Colors.blueAccent,
     child: Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -159,7 +191,7 @@ class _LandingPageState extends State<LandingPage> {
           const SizedBox(height: 10),
           Text(
             title,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: Colors.white,
