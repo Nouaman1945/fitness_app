@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import '../widgets/custom_bottom_nav_bar.dart';
 import '../widgets/custom_drawer.dart';
 import '../widgets/splash_out.dart';
 import 'Login_screen.dart';
@@ -141,6 +142,7 @@ class _LandingPageState extends State<LandingPage> {
           }
         },
       ),
+      bottomNavigationBar: CustomBottomNavBar(currentIndex: 2),
     );
   }
 }

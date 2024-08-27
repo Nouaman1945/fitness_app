@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import '../widgets/custom_drawer.dart';
-import 'workout_detail_screen.dart'; // Import the WorkoutDetailScreen
+import '../widgets/custom_bottom_nav_bar.dart';
+import 'workout_detail_screen.dart';
+import 'profile_screen.dart';
+import 'nutrition_plans_screen.dart';
+import 'settings_screen.dart';
 
 class WorkoutPlansScreen extends StatefulWidget {
   @override
@@ -55,7 +58,6 @@ class _WorkoutPlansScreenState extends State<WorkoutPlansScreen> {
       appBar: AppBar(
         title: Text('Workout Plans'),
       ),
-      drawer: const CustomDrawer(), // Include your app drawer here
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -77,9 +79,9 @@ class _WorkoutPlansScreenState extends State<WorkoutPlansScreen> {
                             workoutData: {
                               'workoutName': workout['name']!,
                               'description': workout['description']!,
-                              'duration': 'Not specified', // You can customize this
-                              'caloriesBurned': 'Not specified', // You can customize this
-                              'date': 'Not specified', // You can customize this
+                              'duration': 'Not specified', // Customize as needed
+                              'caloriesBurned': 'Not specified', // Customize as needed
+                              'date': 'Not specified', // Customize as needed
                             },
                           ),
                         ));
@@ -121,6 +123,7 @@ class _WorkoutPlansScreenState extends State<WorkoutPlansScreen> {
           ],
         ),
       ),
+      bottomNavigationBar: CustomBottomNavBar(currentIndex: 0), // Update index as needed
     );
   }
 }
