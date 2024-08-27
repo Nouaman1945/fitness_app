@@ -1,62 +1,46 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
-import '../screens/onboarding_flow.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../screens/LandingPageIndiv.dart';
+import '/screens/IndivSetup.dart'; // Adjust the import path
+import '/screens/login_screen.dart'; // Adjust the import path
 
-class SplashScreen extends StatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key);
-
-  @override
-  _SplashScreenState createState() => _SplashScreenState();
-}
-
-class _SplashScreenState extends State<SplashScreen> {
-  @override
-  void initState() {
-    super.initState();
-    Timer(const Duration(seconds: 3), () {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const OnboardingFlow()), // Navigate to onboarding
-      );
-    });
-  }
-
+class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Colors.deepPurple, Colors.purpleAccent],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.fitness_center,
-                size: 100,
-                color: Colors.white,
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                'Fitness App',
-                style: TextStyle(
-                  fontSize: 24,
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 20),
-              const CircularProgressIndicator(
-                color: Colors.white,
-              ),
-            ],
-          ),
-        ),
-      ),
+    return FutureBuilder(
+      future: _checkUserSetup(context),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        } else {
+          return snapshot.data!;
+        }
+      },
     );
+  }
+
+  Future<Widget> _checkUserSetup(BuildContext context) async {
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user != null) {
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+
+      if (userDoc.exists && userDoc['fullName'] != null) {
+        // User is signed in and setup is complete
+        return LandingPage();
+      } else {
+        // User is signed in but setup is not complete
+        return IndividualSetupScreen();
+      }
+    } else {
+      // User is not signed in
+      return LoginScreen(); // Or whatever screen you use for login
+    }
   }
 }

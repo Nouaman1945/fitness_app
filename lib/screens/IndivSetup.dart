@@ -81,8 +81,9 @@ class _IndividualSetupScreenState extends State<IndividualSetupScreen> {
 
       // Navigate to Landing Page after successful setup
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const LandingPage ()),
+        MaterialPageRoute(builder: (context) => const LandingPage()),
       );
+
     } catch (e) {
       print('Error occurred during data upload: $e');
       setState(() {
@@ -116,10 +117,7 @@ class _IndividualSetupScreenState extends State<IndividualSetupScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Individual Setup'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
+        leading: Container(),  // Removes the back button
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
