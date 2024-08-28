@@ -240,9 +240,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _buildSocialButton("assets/images/google_icon.svg"),
-        SizedBox(width: 10),
-        _buildSocialButton("assets/images/facebook_icon.svg"),
+        _buildSocialButton("assets/images/icons8-google.svg"),
+        SizedBox(width: 20),
+        _buildSocialButton("assets/images/icons8-facebook.svg"),
       ],
     );
   }

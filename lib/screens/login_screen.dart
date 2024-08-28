@@ -232,9 +232,9 @@ class _LoginScreenState extends State<LoginScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _buildSocialButton("assets/images/google_icon.svg"),
+        _buildSocialButton("assets/images/icons8-google.svg"),
         SizedBox(width: 20),
-        _buildSocialButton("assets/images/facebook_icon.svg"),
+        _buildSocialButton("assets/images/icons8-facebook.svg"),
       ],
     );
   }

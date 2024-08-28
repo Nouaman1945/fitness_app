@@ -15,6 +15,7 @@ class CoachSetupScreen extends StatefulWidget {
 
 class _CoachSetupScreenState extends State<CoachSetupScreen> {
   final _formKey = GlobalKey<FormState>();
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _bioController = TextEditingController();
   final TextEditingController _certificationsController = TextEditingController();
@@ -71,6 +72,7 @@ class _CoachSetupScreenState extends State<CoachSetupScreen> {
 
       // Save coach data to Firestore
       await FirebaseFirestore.instance.collection('coaches').doc(user.uid).set({
+        'email': _emailController.text,
         'fullName': _fullNameController.text,
         'bio': _bioController.text,
         'certifications': _certificationsController.text,
@@ -139,6 +141,23 @@ class _CoachSetupScreenState extends State<CoachSetupScreen> {
                     fontWeight: FontWeight.bold,
                     color: Colors.deepPurple,
                   ),
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    border: OutlineInputBorder(),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your email';
+                    }
+                    if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                      return 'Please enter a valid email';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 20),
                 TextFormField(

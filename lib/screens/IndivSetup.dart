@@ -4,7 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'LandingPageIndiv.dart'; // Ensure the correct import path
+import 'LandingPageIndiv.dart';
 
 class IndividualSetupScreen extends StatefulWidget {
   const IndividualSetupScreen({Key? key}) : super(key: key);
@@ -18,10 +18,10 @@ class _IndividualSetupScreenState extends State<IndividualSetupScreen> {
   final TextEditingController _fullNameController = TextEditingController();
   final TextEditingController _fitnessGoalController = TextEditingController();
   final TextEditingController _ageController = TextEditingController();
-  final TextEditingController _genderController = TextEditingController();
+  String? _selectedGender;
+  final ImagePicker _picker = ImagePicker();
 
   File? _image;
-  final ImagePicker _picker = ImagePicker();
   bool _isLoading = false;
 
   Future<void> _pickImage() async {
@@ -52,10 +52,9 @@ class _IndividualSetupScreenState extends State<IndividualSetupScreen> {
       if (_image != null) {
         final storageRef = FirebaseStorage.instance
             .ref()
-            .child('profileImages') // Ensure this path is correct in Firebase Storage
+            .child('profileImages')
             .child('${user.uid}_${DateTime.now().millisecondsSinceEpoch}');
 
-        // Upload the image to Firebase Storage
         final uploadTask = storageRef.putFile(_image!);
         final snapshot = await uploadTask.whenComplete(() {
           if (uploadTask.snapshot.state != TaskState.success) {
@@ -63,34 +62,29 @@ class _IndividualSetupScreenState extends State<IndividualSetupScreen> {
           }
         });
 
-        // Get the download URL
         imageUrl = await snapshot.ref.getDownloadURL();
       }
 
-      // Save user data to Firestore
       await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
         'fullName': _fullNameController.text,
-        'email': user.email, // Assuming the user is already signed up
+        'email': user.email,
         'age': int.parse(_ageController.text),
-        'gender': _genderController.text,
+        'gender': _selectedGender,
         'fitnessGoal': _fitnessGoalController.text,
         'profileImageUrl': imageUrl,
         'createdAt': Timestamp.now(),
         'updatedAt': Timestamp.now(),
       });
 
-      // Navigate to Landing Page after successful setup
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const LandingPage()),
       );
 
     } catch (e) {
-      print('Error occurred during data upload: $e');
       setState(() {
         _isLoading = false;
       });
 
-      // Show an error dialog
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -110,7 +104,6 @@ class _IndividualSetupScreenState extends State<IndividualSetupScreen> {
       });
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -151,20 +144,6 @@ class _IndividualSetupScreenState extends State<IndividualSetupScreen> {
                 ),
                 const SizedBox(height: 20),
                 TextFormField(
-                  controller: _fitnessGoalController,
-                  decoration: const InputDecoration(
-                    labelText: 'Fitness Goal',
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your fitness goal';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 20),
-                TextFormField(
                   controller: _ageController,
                   decoration: const InputDecoration(
                     labelText: 'Age',
@@ -183,15 +162,36 @@ class _IndividualSetupScreenState extends State<IndividualSetupScreen> {
                   },
                 ),
                 const SizedBox(height: 20),
-                TextFormField(
-                  controller: _genderController,
+                DropdownButtonFormField<String>(
                   decoration: const InputDecoration(
                     labelText: 'Gender',
                     border: OutlineInputBorder(),
                   ),
+                  value: _selectedGender,
+                  onChanged: (newValue) {
+                    setState(() {
+                      _selectedGender = newValue;
+                    });
+                  },
+                  items: ['Male', 'Female', 'Other']
+                      .map((gender) => DropdownMenuItem(
+                    value: gender,
+                    child: Text(gender),
+                  ))
+                      .toList(),
+                  validator: (value) =>
+                  value == null ? 'Please select your gender' : null,
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: _fitnessGoalController,
+                  decoration: const InputDecoration(
+                    labelText: 'Fitness Goal',
+                    border: OutlineInputBorder(),
+                  ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter your gender';
+                      return 'Please enter your fitness goal';
                     }
                     return null;
                   },
@@ -205,7 +205,10 @@ class _IndividualSetupScreenState extends State<IndividualSetupScreen> {
                 if (_image != null)
                   Padding(
                     padding: const EdgeInsets.symmetric(vertical: 20),
-                    child: Image.file(_image!),
+                    child: CircleAvatar(
+                      radius: 50,
+                      backgroundImage: FileImage(_image!),
+                    ),
                   ),
                 const SizedBox(height: 40),
                 ElevatedButton(
